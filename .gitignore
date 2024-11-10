@@ -1,0 +1,5 @@
+.env
+**/__pycache__
+bot/config/proxies.com
+sessions/*
+user_agents.json
