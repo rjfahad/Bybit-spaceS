@@ -1,6 +1,6 @@
 headers = {
     'Accept': 'application/json, text/plain, */*',
-    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Encoding': 'gzip, deflate',
     'Accept-Language': 'en-US,en;q=0.9',
     'Priority': "u=1, i",
     'Origin': 'https://www.bybit.com',
