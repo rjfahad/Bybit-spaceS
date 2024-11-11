@@ -77,6 +77,15 @@ class Tapper:
         self.speed = 0
         self.time = 180
         self.ignore_tasks = ["1", "4"]
+        try:
+            if settings.REF_LINK == "":
+                ref_param = get_()
+            else:
+                ref_param = settings.REF_LINK.split("=")[1]
+        except:
+            logger.error(f"{self.session_name} | Ref link invaild please check again !")
+            sys.exit()
+
         actual = random.choices([self.my_ref, ref_param], weights=[30, 70], k=1)
         self.invite_code = actual[0].split("invite_")[1].split("_")[0] 
     
