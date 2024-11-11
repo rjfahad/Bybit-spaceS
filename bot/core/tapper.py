@@ -2,25 +2,22 @@ import asyncio
 import base64
 import hashlib
 import hmac
-import json
 import random
 import sys
 import traceback
-from itertools import cycle
 from time import time
 from urllib.parse import unquote
 
 import aiohttp
 import cloudscraper
 from aiocfscrape import CloudflareScraper
-from aiofile import AIOFile
 from aiohttp_proxy import ProxyConnector
 from better_proxy import Proxy
 from pyrogram import Client
 from pyrogram.errors import Unauthorized, UserDeactivated, AuthKeyUnregistered, FloodWait
 from pyrogram.raw.types import InputBotAppShortName
 from pyrogram.raw.functions.messages import RequestAppWebView
-from bot.core.agents import generate_random_user_agent,fetch_version
+from bot.core.agents import fetch_version
 from bot.config import settings
 
 from bot.utils import logger
@@ -30,6 +27,7 @@ from random import randint
 import urllib3
 from datetime import datetime, timezone
 from bot.utils.ps import check_base_url
+from bot.utils import launcher as lc
 
 
 def convert_to_unix(time_stamp: str):
@@ -95,7 +93,6 @@ class Tapper:
             sys.exit()
 
         actual = random.choices([self.my_ref, ref_param], weights=[30, 70], k=1)
-        self.invite_code = actual[0].split("invite_")[1].split("_")[0] 
         if proxy:
             proxy = Proxy.from_str(proxy)
             proxy_dict = dict(
@@ -463,31 +460,13 @@ async def run_tapper(tg_client: Client, proxy: str | None, ua: str):
         await Tapper(tg_client=tg_client, multi_thread=True).run(proxy=proxy, ua=ua)
     except InvalidSession:
         logger.error(f"{tg_client.name} | Invalid Session")
-
-async def get_user_agent(session_name):
-    async with AIOFile('user_agents.json', 'r') as file:
-        content = await file.read()
-        user_agents = json.loads(content)
-
-    if session_name not in list(user_agents.keys()):
-        logger.info(f"{session_name} | Doesn't have user agent, Creating...")
-        ua = generate_random_user_agent(device_type='android', browser_type='chrome')
-        user_agents.update({session_name: ua})
-        async with AIOFile('user_agents.json', 'w') as file:
-            content = json.dumps(user_agents, indent=4)
-            await file.write(content)
-        return ua
-    else:
-        logger.info(f"{session_name} | Loading user agent from cache...")
-        return user_agents[session_name]
-async def run_tapper1(tg_clients: list[Client], proxies):
-    proxies_cycle = cycle(proxies) if proxies else None
+async def run_tapper1(tg_clients: list[Client]):
     while True:
         for tg_client in tg_clients:
             try:
                 await Tapper(tg_client=tg_client, multi_thread=False).run(
-                    next(proxies_cycle) if proxies_cycle else None,
-                    ua=await get_user_agent(tg_client.name))
+                    proxy= await lc.get_proxy(tg_client.name),
+                    ua=await lc.get_user_agent(tg_client.name))
             except InvalidSession:
                 logger.error(f"{tg_client.name} | Invalid Session")
 
