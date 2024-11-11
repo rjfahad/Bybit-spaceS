@@ -95,6 +95,7 @@ class Tapper:
             sys.exit()
 
         actual = random.choices([self.my_ref, ref_param], weights=[30, 70], k=1)
+        self.invite_code = actual[0].split("invite_")[1].split("_")[0] 
         if proxy:
             proxy = Proxy.from_str(proxy)
             proxy_dict = dict(
