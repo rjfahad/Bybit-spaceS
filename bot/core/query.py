@@ -4,19 +4,16 @@ import hashlib
 import hmac
 import json
 import random
-import sys
 import traceback
-from itertools import cycle
 from time import time
 from urllib.parse import unquote
 
 import aiohttp
 import cloudscraper
 from aiocfscrape import CloudflareScraper
-from aiofile import AIOFile
 from aiohttp_proxy import ProxyConnector
 from better_proxy import Proxy
-from bot.core.agents import generate_random_user_agent, fetch_version
+from bot.core.agents import fetch_version
 from bot.config import settings
 
 from bot.utils import logger
@@ -27,6 +24,7 @@ from random import randint
 from datetime import datetime, timezone
 import urllib3
 from bot.utils.ps import check_base_url
+from bot.utils import launcher as lc
 
 
 def convert_to_unix(time_stamp):
@@ -77,18 +75,7 @@ class Tapper:
         self.speed = 0
         self.time = 180
         self.ignore_tasks = ["1", "4"]
-        try:
-            if settings.REF_LINK == "":
-                ref_param = get_()
-            else:
-                ref_param = settings.REF_LINK.split("=")[1]
-        except:
-            logger.error(f"{self.session_name} | Ref link invaild please check again !")
-            sys.exit()
-
-        actual = random.choices([self.my_ref, ref_param], weights=[30, 70], k=1)
-        self.invite_code = actual[0].split("invite_")[1].split("_")[0] 
-    
+        self.invite_code = self.my_ref.split("invite_")[1].split("_")[0]
 
     async def check_proxy(self, http_client: aiohttp.ClientSession, proxy: Proxy) -> None:
         try:
@@ -400,42 +387,14 @@ async def run_query_tapper(query: str, proxy: str | None, ua: str):
         await Tapper(query=query, multi_thread=True).run(proxy=proxy, ua=ua)
     except InvalidSession:
         logger.error(f"Invalid Query: {query}")
-
-def fetch_username(query):
-    try:
-        fetch_data = unquote(query).split("user=")[1].split("&auth_date=")[0]
-        json_data = json.loads(fetch_data)
-        return json_data['username']
-    except:
-        logger.warning(f"Invaild query: {query}")
-        sys.exit()
-
-
-async def get_user_agent(session_name):
-    async with AIOFile('user_agents.json', 'r') as file:
-        content = await file.read()
-        user_agents = json.loads(content)
-
-    if session_name not in list(user_agents.keys()):
-        logger.info(f"{session_name} | Doesn't have user agent, Creating...")
-        ua = generate_random_user_agent(device_type='android', browser_type='chrome')
-        user_agents.update({session_name: ua})
-        async with AIOFile('user_agents.json', 'w') as file:
-            content = json.dumps(user_agents, indent=4)
-            await file.write(content)
-        return ua
-    else:
-        logger.info(f"{session_name} | Loading user agent from cache...")
-        return user_agents[session_name]
-async def run_query_tapper1(querys: list[str], proxies):
-    proxies_cycle = cycle(proxies) if proxies else None
+async def run_query_tapper1(querys: list[str]):
 
     while True:
         for query in querys:
             try:
                 await Tapper(query=query, multi_thread=False).run(
-                    next(proxies_cycle) if proxies_cycle else None,
-                    ua=await get_user_agent(fetch_username(query)))
+                    proxy=await lc.get_proxy(lc.fetch_username(query)),
+                    ua=await lc.get_user_agent(lc.fetch_username(query)))
             except InvalidSession:
                 logger.error(f"Invalid Query: {query}")
 
