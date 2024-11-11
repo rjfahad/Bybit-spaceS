@@ -77,7 +77,9 @@ class Tapper:
         self.speed = 0
         self.time = 180
         self.ignore_tasks = ["1", "4"]
-        self.invite_code = self.my_ref.split("invite_")[1].split("_")[0]
+        actual = random.choices([self.my_ref, ref_param], weights=[30, 70], k=1)
+        self.invite_code = actual[0].split("invite_")[1].split("_")[0] 
+    
 
     async def check_proxy(self, http_client: aiohttp.ClientSession, proxy: Proxy) -> None:
         try:
