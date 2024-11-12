@@ -260,7 +260,7 @@ class Tapper:
 
     def generate_payload(self, start_time):
         time_ = randint(40, 60)
-        gift = randint(0, 3) * 50
+        gift = randint(1, 6) * 50
         points = time_ * 2 + gift
         end_time = int(int(start_time) + time_ * 1000)
         payload = convert_to_hmac({"start_time": start_time, "end_time": end_time, "point": points}, self.game_key)
