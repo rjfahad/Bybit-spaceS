@@ -31,6 +31,8 @@ else
 	echo "Skipping .env copying"
 fi
 
+echo "Updating bot..."
+git pull
 echo "Starting the bot..."
 python3 main.py
 
