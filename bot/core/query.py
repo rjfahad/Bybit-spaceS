@@ -23,7 +23,7 @@ from random import randint
 
 from datetime import datetime, timezone
 import urllib3
-from bot.utils.ps import check_base_url
+# from bot.utils.ps import check_base_url
 from bot.utils import launcher as lc
 
 
