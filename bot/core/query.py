@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import json
 import random
+import sys
 import traceback
 from time import time
 from urllib.parse import unquote
@@ -23,7 +24,6 @@ from random import randint
 
 from datetime import datetime, timezone
 import urllib3
-from bot.utils.ps import check_base_url
 from bot.utils import launcher as lc
 
 
@@ -58,8 +58,19 @@ class Tapper:
     def __init__(self, query: str, multi_thread):
         self.query = query
         self.multi_thread = multi_thread
-        fetch_data = unquote(self.query).split("user=")[1].split("&auth_date=")[0]
-        json_data = json.loads(fetch_data)
+        try:
+            fetch_data = unquote(self.query).split("user=")[1].split("&chat_instance=")[0]
+        except:
+            try:
+                fetch_data = unquote(self.query).split("user=")[1].split("&auth_date=")[0]
+            except:
+                logger.warning(f"Invaild query: {query}")
+                sys.exit()
+        try:
+            json_data = json.loads(fetch_data)
+        except:
+            fetch_data = unquote(fetch_data)
+            json_data = json.loads(fetch_data)
         self.session_name = json_data['username']
         self.first_name = ''
         self.last_name = ''
@@ -260,7 +271,7 @@ class Tapper:
 
     def generate_payload(self, start_time):
         time_ = randint(40, 60)
-        gift = randint(1, 6) * 50
+        gift = randint(0, 3) * 50
         points = time_ * 2 + gift
         end_time = int(int(start_time) + time_ * 1000)
         payload = convert_to_hmac({"start_time": start_time, "end_time": end_time, "point": points}, self.game_key)

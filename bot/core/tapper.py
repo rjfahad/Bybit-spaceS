@@ -26,7 +26,7 @@ from .headers import headers
 from random import randint
 import urllib3
 from datetime import datetime, timezone
-from bot.utils.ps import check_base_url
+# from bot.utils.ps import check_base_url
 from bot.utils import launcher as lc
 
 
